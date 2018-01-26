@@ -17,12 +17,16 @@ class Service {
 
 		this._connectionOptions = connectionOptions;
 
-		this._consumeConnection = new Connection(Object.assign(this._connectionOptions, {name: 'consumeConnection'}));
+		this._consumeConnection = new Connection(
+			Object.assign(this._connectionOptions, { name: 'consumeConnection' })
+		);
 		this._consumeConnection.on('close', () => {
 			this._reconnectConsume();
 		});
 
-		this._responseConnection = new Connection(Object.assign(this._connectionOptions, {name: 'responseConnection'}));
+		this._responseConnection = new Connection(
+			Object.assign(this._connectionOptions, { name: 'responseConnection' })
+		);
 
 		this._responseConnection.on('close', () => {
 			this._reconnectResponse();
@@ -50,9 +54,11 @@ class Service {
 		} else {
 			this.createQueuePromise = this._consumeConnection.newChannel().then((channel) => {
 				return channel.assertQueue(this.serviceQueueName, { durable: true }).then(({ queue }) => {
-					return channel.bindQueue(queue, this._consumeConnection.exchangeName, this.serviceName).then(() => {
-						channel.close();
-					});
+					return channel
+						.bindQueue(queue, this._consumeConnection.exchangeName, this.serviceName)
+						.then(() => {
+							channel.close();
+						});
 				});
 			});
 			return this.createQueuePromise;
@@ -84,58 +90,76 @@ class Service {
 		const self = this;
 		return this._consumeConnection.newChannel().then((channel) => {
 			return channel.prefetch(this.limit).then(() => {
-				return channel.consume(this.serviceQueueName, (message) => {
-					this._log.debug(message.properties);
-					const requestId = message.properties.correlationId;
-					const responseQueue = message.properties.replyTo;
-					const method = message.properties.type;
-					this._log.debug('received new message to consume for service ' + self.serviceName);
-					if (this._handler[method]) {
-						this._log.debug('find handler to consume for service ' + self.serviceName + ' and method ' + method);
-						const data = JSON.parse(message.content.toString());
-						let handler;
-						try {
-							handler = Promise.resolve(this._handler[method](data));
-						} catch (err) {
-							handler = Promise.reject(err);
-						}
+				return channel.consume(
+					this.serviceQueueName,
+					(message) => {
+						this._log.debug(message.properties);
+						const requestId = message.properties.correlationId;
+						const responseQueue = message.properties.replyTo;
+						const method = message.properties.type;
+						this._log.debug('received new message to consume for service ' + self.serviceName);
+						if (this._handler[method]) {
+							this._log.debug(
+								'find handler to consume for service ' + self.serviceName + ' and method ' + method
+							);
+							const data = JSON.parse(message.content.toString());
+							let handler;
+							try {
+								handler = Promise.resolve(this._handler[method](data));
+							} catch (err) {
+								handler = Promise.reject(err);
+							}
 
-						let encodedresult;
+							let encodedresult;
 
-						handler
-							.then((result) => {
-								this._log.debug('Handler return a result for service ' + self.serviceName + ' and method ' + method);
-								encodedresult = new Buffer(
-									JSON.stringify({
-										err: null,
-										data: result
-									})
-								);
-							})
-							.catch((err) => {
-								this._log.debug('Handler throw an error for service ' + self.serviceName + ' and method ' + method);
-								encodedresult = new Buffer(
-									JSON.stringify({
-										err: err.message,
-										data: null
-									})
-								);
-							})
-							.then(() => {
-								if (responseQueue) {
-									this.responseChannel.then((channel) => {
-										channel.publish('', responseQueue, encodedresult, {
-											correlationId: requestId
+							handler
+								.then((result) => {
+									this._log.debug(
+										'Handler return a result for service ' +
+											self.serviceName +
+											' and method ' +
+											method
+									);
+									encodedresult = new Buffer(
+										JSON.stringify({
+											err: null,
+											data: result
+										})
+									);
+								})
+								.catch((err) => {
+									this._log.debug(
+										'Handler throw an error for service ' +
+											self.serviceName +
+											' and method ' +
+											method
+									);
+									encodedresult = new Buffer(
+										JSON.stringify({
+											err: err.message,
+											data: null
+										})
+									);
+								})
+								.then(() => {
+									if (responseQueue) {
+										this.responseChannel.then((channel) => {
+											channel.publish('', responseQueue, encodedresult, {
+												correlationId: requestId
+											});
 										});
-									});
-								}
-								channel.ack(message);
-							});
-					} else {
-						this._log.debug("did'nt find handler " + method + ' to consume :( for service ' + self.serviceName);
-						channel.nack(message);
-					}
-				}, { noAck: false });
+									}
+									channel.ack(message);
+								});
+						} else {
+							this._log.debug(
+								"did'nt find handler " + method + ' to consume :( for service ' + self.serviceName
+							);
+							channel.nack(message);
+						}
+					},
+					{ noAck: false }
+				);
 			});
 		});
 	}

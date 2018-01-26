@@ -28,8 +28,9 @@
   },
   "homepage": "https://github.com/Beekast/bk-rabbitmq-rpc#readme",
   "devDependencies": {
-    "ava": "0.19.1",
-    "eslint": "4.0.0",
+    "ava": "^0.24.0",
+    "babel-eslint": "^8.2.1",
+    "eslint": "^4.16.0",
     "nyc": "11.0.2"
   },
   "dependencies": {
