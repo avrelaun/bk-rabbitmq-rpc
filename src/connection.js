@@ -1,4 +1,5 @@
 const amqp = require('amqplib');
+const backoff = require('backoff');
 const EventEmitter = require('events');
 
 class Connection extends EventEmitter {
@@ -35,32 +36,50 @@ class Connection extends EventEmitter {
 	}
 
 	_connection () {
-		return new Promise((resolve, reject) => {
-			amqp
-				.connect(this.url)
-				.then((connection) => {
-					connection.on('close', () => {
-						this.connectionPromise = null;
-						this.log.info('Connection close');
-						this.emit('close');
-					});
-					connection.on('error', (err) => {
+		this.log.info('------------------ RPC CONNECTION');
+		return new Promise((resolve) => {
+			let boff = backoff.exponential({
+				randomisationFactor: 1,
+				initialDelay: 1000,
+				maxDelay: 30000
+			});
+
+			boff.on('backoff', (number, delay) => {
+				this.log.info('RPC - BACKOFF FIRE: ' + number + ' ' + delay + 'ms');
+			});
+
+			boff.on('ready', (number, delay) => {
+				this.log.info('------------------ RPC READY: ' + number + ' delay:' + delay);
+				amqp
+					.connect(this.url)
+					.then((connection) => {
+						connection.on('close', () => {
+							this.connectionPromise = null;
+							this.log.info('Connection close');
+							this.emit('close');
+						});
+						connection.on('error', (err) => {
+							this.log.info('RPC - ERROR FROM NUMBER: ' + number + ' WITH DELAY: ' + delay);
+							this.log.error(err);
+							this.emit('error', err);
+						});
+						this.log.info('Connected to ' + this.url);
+						boff.reset();
+						return resolve(connection);
+					})
+					.catch((err) => {
+						boff.backoff();
+						console.log('RPC - GLOBAL ERROR FROM NUMBER: ' + number + ' WITH DELAY: ' + delay);
 						this.log.error(err);
-						this.emit('error', err);
 					});
-					this.log.info('Connected to ' + this.url);
-					return resolve(connection);
-				})
-				.catch((err) => {
-					this.log.error(err);
-					return setTimeout(() => {
-						return resolve(Promise.resolve(this._connection()));
-					}, this.reconnectDelay);
-				});
+			});
+
+			boff.backoff();
 		});
 	}
 
 	getConnection () {
+		this.log.info('--------------------- RPC GET CONN');
 		if (this.connectionPromise) {
 			return this.connectionPromise;
 		}
