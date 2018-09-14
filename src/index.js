@@ -10,7 +10,6 @@ class RabbitmqRPC {
 			url = 'amqp://guest:guest@localhost:5672/',
 			logLevel = 'info',
 			logName = 'RabbitmqRPC',
-			exchangeName = 'RabbitmqRPC',
 			timeout = 10000,
 			log
 		} =
@@ -28,8 +27,7 @@ class RabbitmqRPC {
 
 		this._brokerOptions = {
 			url,
-			log: this._log,
-			exchangeName
+			log: this._log
 		};
 
 		this._broker = new ServiceBroker(this._brokerOptions, 'requestConnection');
@@ -62,6 +60,10 @@ class RabbitmqRPC {
 
 	createService (name, opts) {
 		return new Service(this._broker, name, opts, this._connectionOptions, this._log);
+	}
+
+	start () {
+		this._broker.start();
 	}
 }
 

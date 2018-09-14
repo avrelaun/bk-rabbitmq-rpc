@@ -2,7 +2,6 @@ class Service {
 	constructor (broker, serviceName, opts, connectionOptions, log) {
 		const { limit = false } = opts || {};
 
-		this._handler = {};
 		this.isConsumerStarted = false;
 		this._log = log;
 		this.limit = limit;
@@ -11,18 +10,22 @@ class Service {
 		if (!serviceName) {
 			throw new Error('you must provide a service name');
 		}
-		this.serviceName = serviceName;
+		this._schema = {
+			name: serviceName,
+			action: {
+			}
+		};
 	}
 
 	handle (method, callback) {
-		if (this._handler[method]) {
+		if (this._schema.action[method]) {
 			throw new Error('handler already define');
 		}
-		this._handler[method] = callback;
+		this._schema.action[method] = callback;
 	}
 
 	startConsume () {
-		this._broker.loadService(this._handler);
+		this._broker.createService(this._schema);
 	}
 }
 
