@@ -34,14 +34,12 @@ class RabbitmqRPC {
 	}
 
 	request (serviceName, method, data, options) {
-		const requestId = uuid();
-		const content = JSON.stringify(data);
+		console.log(`------------------------ request service ${serviceName} with method ${method}`);
+		// const requestId = uuid();
 		let { timeout = this._timeout } = options || {};
 
-		this._broker.call(`${serviceName}.${method}`, content, {
-			expiration: timeout,
-			correlationId: requestId,
-			type: method
+		return this._broker.call(`${serviceName}.${method}`, data, {
+			timeout
 		});
 	}
 
