@@ -5,7 +5,6 @@
 		"es6": true
 	},
 
-	"parser": "babel-eslint",
 	"parserOptions": {
 		"sourceType": "module",
 		"ecmaVersion": 8,
@@ -28,7 +27,8 @@
 
 		"array-callback-return": 2,
 		"block-scoped-var": 1,
-		"complexity": [1, 10],
+		"class-methods-use-this": 1,
+		"complexity": [1, 20],
 		"consistent-return": 1,
 		"curly": 1,
 		"default-case": 2,
@@ -38,16 +38,27 @@
 		"guard-for-in": 1,
 		"no-alert": 1,
 		"no-caller": 2,
+		"no-div-regex": 1,
+		"no-else-return": 1,
 		"no-empty-function": 1,
+		"no-eq-null": 2,
 		"no-eval": 2,
+		"no-extend-native": 2,
 		"no-extra-bind": 1,
 		"no-extra-label": 1,
 		"no-floating-decimal": 2,
+		"no-implicit-globals": 1,
 		"no-implied-eval": 2,
 		"no-invalid-this": 1,
 		"no-iterator": 2,
+		"no-labels": 1,
+		"no-lone-blocks": 1,
 		"no-loop-func": 2,
 		"no-multi-spaces": 1,
+		"no-multi-str": 1,
+		"no-new": 1,
+		"no-new-func": 2,
+		"no-new-wrappers": 2,
 		"no-octal-escape": 2,
 		"no-proto": 2,
 		"no-return-assign": 1,
@@ -55,6 +66,7 @@
 		"no-script-url": 2,
 		"no-sequences": 2,
 		"no-self-compare": 2,
+		"no-sequences": 1,
 		"no-throw-literal": 1,
 		"no-unmodified-loop-condition": 1,
 		"no-unused-expressions": 1,
@@ -63,19 +75,22 @@
 		"no-useless-escape": 1,
 		"no-useless-return": 1,
 		"no-void": 1,
-		"no-warning-comments": [1, { "terms": ["fixme"], "location": "anywhere" }],
 		"no-with": 1,
 		"prefer-promise-reject-errors": 1,
+		"radix": [2, "as-needed"],
 		"require-await": 1,
 		"wrap-iife": 1,
 		"yoda": 1,
 
 		"no-label-var": 2,
+		"no-shadow-restricted-names": 2,
+		"no-undef-init": 2,
 		"no-unused-vars": [1, {
 			"vars": "all",
 			"args": "after-used"
 		}],
 
+		"array-bracket-newline": [1, "consistent"],
 		"array-bracket-spacing": [1, "never"],
 		"block-spacing": 1,
 		"brace-style": [1, "1tbs", { "allowSingleLine": true }],
@@ -88,6 +103,7 @@
 		"computed-property-spacing": [1, "never"],
 		"eol-last": [1, "always"],
 		"func-call-spacing": [1, "never"],
+		"func-name-matching": [2, "always"],
 		"function-paren-newline": [2, "consistent"],
 		"implicit-arrow-linebreak": [1, "beside"],
 		"indent": [1, "tab", { "SwitchCase": 1 }],
@@ -98,9 +114,14 @@
 		"max-depth": [1, { "max": 4 }],
 		"max-len": [1, { "code": 120, "tabWidth": 4, "ignoreRegExpLiterals": true, "ignoreStrings": true }],
 		"max-lines": [1, { "max": 300, "skipBlankLines": true, "skipComments": true }],
+		"max-nested-callbacks": [2, { "max": 5 }],
 		"max-params": [1, 5],
 		"max-statements": [1, 25],
+		"max-statements-per-line": [1, { "max": 1 }],
+		"new-parens": 2,
+		"no-array-constructor": 2,
 		"no-continue": 1,
+		"no-lonely-if": 1,
 		"no-mixed-spaces-and-tabs": 1,
 		"no-multiple-empty-lines": [1, {
 			"max": 2,
@@ -108,16 +129,30 @@
 			"maxEOF": 1
 		}],
 		"no-negated-condition": 1,
+		"no-nested-ternary": 2,
 		"no-trailing-spaces": 1,
 		"no-underscore-dangle": 0,
+		"no-unneeded-ternary": 1,
 		"no-whitespace-before-property": 1,
+		"object-curly-spacing": [1, "always"],
+		"object-property-newline": [1, { "allowAllPropertiesOnSameLine": true }],
+		"operator-assignment": [1, "always"],
 		"operator-linebreak": [1, "after"],
+		"padded-blocks": [1, "never"],
 		"quote-props": [1, "as-needed"],
 		"quotes": [2, "single", "avoid-escape"],
 		"semi": [1, "always"],
 		"semi-spacing": [1, { "before": false, "after": true }],
+		"semi-style": [1, "last"],
+		"space-before-blocks": [1, "always"],
 		"space-before-function-paren": [1, "always"],
+		"space-in-parens": [1, "never"],
+		"space-infix-ops": 1,
+		"space-unary-ops": [1, { "words": true, "nonwords": false }],
 		"spaced-comment": [1, "always"],
+		"switch-colon-spacing": [1, { "before": false, "after": true }],
+		"template-tag-spacing": [1, "always"],
+		"unicode-bom": [2, "never"],
 
 		"arrow-parens": [1, "always"],
 		"arrow-spacing": 1,
@@ -125,15 +160,24 @@
 		"no-confusing-arrow": 1,
 		"no-duplicate-imports": 2,
 		"no-useless-computed-key": 1,
+		"no-useless-rename": 2,
 		"no-var": 2,
 		"object-shorthand": 1,
-		"template-curly-spacing": 1
+		"prefer-arrow-callback": 1,
+		"prefer-numeric-literals": 1,
+		"prefer-rest-params": 1,
+		"prefer-spread": 1,
+		"rest-spread-spacing": [1, "never"],
+		"template-curly-spacing": 1,
+		"yield-star-spacing": [1, { "before": true, "after": false }]
 	},
+
 	"overrides": [
 		{
 			"files": "*.spec.js",
 			"rules": {
-				"no-console": 0
+				"no-console": 0,
+				"no-new": 0
 			}
 		}
 	]

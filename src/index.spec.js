@@ -19,6 +19,7 @@ test('test instance with default args', (t) => {
 
 test('test instance with custom args', (t) => {
 	try {
+2
 		const opts = {
 			url: 'amqp://guest:guest@127.0.0.1:5672/',
 			log: bunyan.createLogger({ name: 'newTest' })

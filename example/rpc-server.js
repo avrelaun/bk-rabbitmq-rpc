@@ -9,16 +9,16 @@ const service = client.createService('my.service.rpc', {
 	limit: 1000
 });
 
-function sum (a, b){
+function sum (a, b) {
 	return new Promise((resolve) => {
 		setTimeout(() => {
-			return resolve(a+b);
+			return resolve(a + b);
 		}, 70000);
 		// resolve(a+b);
 	});
 }
 
-service.handle('sum', async ({a, b}) => {
+service.handle('sum', async ({ a, b }) => {
 	const start = Date.now();
 	const result = await sum(a, b);
 	const ms = Date.now() - start;
@@ -26,7 +26,4 @@ service.handle('sum', async ({a, b}) => {
 	return result;
 });
 
-setTimeout(() => {
-
-
-}, 10000000);
+setTimeout(() => {}, 10000000);

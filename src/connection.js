@@ -5,8 +5,7 @@ const EventEmitter = require('events');
 class Connection extends EventEmitter {
 	constructor (opts, name) {
 		super();
-		const { url = 'amqp://guest:guest@localhost:5672/', log, exchangeName, autoCreateExchange = true } =
-			opts || {};
+		const { url = 'amqp://guest:guest@localhost:5672/', log, exchangeName, autoCreateExchange = true } = opts || {};
 
 		if (!log) {
 			throw new Error('need to define log');
@@ -121,28 +120,41 @@ class Connection extends EventEmitter {
 	createExchange () {
 		if (this.createExchangePromise) {
 			return this.createExchangePromise;
-		} else {
-			this.createExchangePromise = new Promise((resolve, reject) => {
-				this.newChannel()
-					.then((channel) => {
-						this.log.info('BK-RPC - Try to create exchange ' + this.exchangeName);
-						channel
-							.assertExchange(this.exchangeName, 'topic', {
-								durable: true,
-								autoDelete: false
-							})
-							.then(() => {
-								this.log.info('BK-RPC - Successfuly create exchange ' + this.exchangeName);
-								channel.close();
-								return resolve();
-							});
-					})
-					.catch((err) => {
-						return reject(err);
-					});
-			});
-			return this.createExchangePromise;
 		}
+		this.createExchangePromise = new Promise((resolve, reject) => {
+			this.newChannel()
+				.then((channel) => {
+					this.log.info(`BK-RPC - Try to create exchange ${this.exchangeName}`);
+					channel
+						.assertExchange(this.exchangeName, 'topic', {
+							durable: true,
+							autoDelete: false
+						})
+						.then(() => {
+							this.log.info(`BK-RPC - Successfuly create exchange ${this.exchangeName}`);
+							channel.close();
+							return resolve();
+						});
+				})
+				.catch((err) => {
+					return reject(err);
+				});
+		});
+		return this.createExchangePromise;
+	}
+
+	close () {
+		return new Promise((resolve, reject) => {
+			this.getConnection()
+				.then((conn) => {
+					conn.close().then(() => {
+						return resolve();
+					});
+				})
+				.catch((err) => {
+					return reject(err);
+				});
+		});
 	}
 }
 

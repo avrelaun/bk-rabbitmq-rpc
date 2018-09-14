@@ -1,4 +1,5 @@
 const Connection = require('./connection');
+
 class Service {
 	constructor (serviceName, opts, connectionOptions, log) {
 		const { autoCreateQueue = true, autoStartConsume = false, limit = false } = opts || {};
@@ -20,7 +21,6 @@ class Service {
 		this._consumeConnection.on('close', () => {
 			this._reconnectConsume();
 		});
-
 
 		this._responseConnection.on('close', () => {
 			this._reconnectResponse();
@@ -45,16 +45,15 @@ class Service {
 	createQueue () {
 		if (this.createQueuePromise) {
 			return this.createQueuePromise;
-		} else {
-			this.createQueuePromise = this._consumeConnection.newChannel().then((channel) => {
-				return channel.assertQueue(this.serviceQueueName, { durable: true }).then(({ queue }) => {
-					return channel.bindQueue(queue, this._consumeConnection.exchangeName, this.serviceName).then(() => {
-						channel.close();
-					});
+		}
+		this.createQueuePromise = this._consumeConnection.newChannel().then((channel) => {
+			return channel.assertQueue(this.serviceQueueName, { durable: true }).then(({ queue }) => {
+				return channel.bindQueue(queue, this._consumeConnection.exchangeName, this.serviceName).then(() => {
+					channel.close();
 				});
 			});
-			return this.createQueuePromise;
-		}
+		});
+		return this.createQueuePromise;
 	}
 
 	handle (method, callback) {
@@ -65,7 +64,7 @@ class Service {
 	}
 
 	_reconnectConsume () {
-		this._log.info('reconnect consume service '+this.serviceName);
+		this._log.info(`reconnect consume service ${this.serviceName}`);
 		this._consumePromise = null;
 		if (this.isConsumerStarted) {
 			this.startConsume();
@@ -73,12 +72,12 @@ class Service {
 	}
 
 	_reconnectResponse () {
-		this._log.info('reconnect reponse channel '+this.serviceName);
+		this._log.info(`reconnect reponse channel ${this.serviceName}`);
 		this.responseChannel = this._responseConnection.newChannel();
 	}
 
 	_consume () {
-		this._log.debug('start to consume service ' + this.serviceName);
+		this._log.debug(`start to consume service ${this.serviceName}`);
 		const self = this;
 		return this._consumeConnection.newChannel().then((channel) => {
 			return channel.prefetch(this.limit).then(() => {
@@ -90,13 +89,17 @@ class Service {
 							const requestId = message.properties.correlationId;
 							const responseQueue = message.properties.replyTo;
 							const method = message.properties.type;
-							this._log.debug('received new message to consume for service ' + self.serviceName);
+							this._log.debug(`received new message to consume for service ${self.serviceName}`);
 							if (this._handler[method]) {
 								const longRequestTimeout = setTimeout(() => {
-									this._log.warn('WARNING request for service ' + self.serviceName + ' and method ' + method + ' took more than 60000 ms', message.content.toString());
+									this._log.warn(
+										`WARNING request for service ${self.serviceName}` +
+											` and method ${method} took more than 60000 ms`,
+										message.content.toString()
+									);
 								}, 60000);
 								this._log.debug(
-									'find handler to consume for service ' + self.serviceName + ' and method ' + method
+									`find handler to consume for service ${self.serviceName} and method ${method}`
 								);
 								const data = JSON.parse(message.content.toString());
 								let handler;
@@ -111,10 +114,8 @@ class Service {
 								handler
 									.then((result) => {
 										this._log.debug(
-											'Handler return a result for service ' +
-												self.serviceName +
-												' and method ' +
-												method
+											// eslint-disable-next-line max-len
+											`Handler return a result for service ${self.serviceName} and method ${method}`
 										);
 										encodedresult = new Buffer(
 											JSON.stringify({
@@ -125,10 +126,8 @@ class Service {
 									})
 									.catch((err) => {
 										this._log.debug(
-											'Handler throw an error for service ' +
-												self.serviceName +
-												' and method ' +
-												method
+											// eslint-disable-next-line max-len
+											`Handler throw an error for service ${self.serviceName} and method ${method}`
 										);
 										encodedresult = new Buffer(
 											JSON.stringify({
@@ -154,7 +153,7 @@ class Service {
 									});
 							} else {
 								this._log.debug(
-									"did'nt find handler " + method + ' to consume :( for service ' + self.serviceName
+									`did not found handler ${method} to consume :( for service ${self.serviceName}`
 								);
 								try {
 									channel.nack(message);
@@ -163,14 +162,17 @@ class Service {
 								}
 							}
 						} catch (err) {
-							this._log.fatal('BK-RPC Fatal error for service' + self.serviceName, err, message.content.toString());
+							this._log.fatal(
+								`BK-RPC Fatal error for service ${self.serviceName}`,
+								err,
+								message.content.toString()
+							);
 							try {
 								channel.ack(message);
 							} catch (err) {
 								this._log.error(err);
 							}
 						}
-
 					},
 					{ noAck: false }
 				);
@@ -183,12 +185,17 @@ class Service {
 		const self = this;
 		if (this._consumePromise) {
 			return this._consumePromise;
-		} else {
-			this._consumePromise = this.createQueue().then(() => {
-				return self._consume();
-			});
-			return this._consumePromise;
 		}
+		this._consumePromise = this.createQueue().then(() => {
+			return self._consume();
+		});
+		return this._consumePromise;
+	}
+
+	closeConnection () {
+		this._log.info(`closing ${this.serviceName} service connections...`);
+		this._consumeConnection.close();
+		this._responseConnection.close();
 	}
 }
 

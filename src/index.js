@@ -3,6 +3,7 @@ const Logger = require('./logger');
 const Service = require('./service');
 
 const uuid = require('uuid/v1');
+
 class RabbitmqRPC {
 	constructor (opts) {
 		const {
@@ -11,7 +12,6 @@ class RabbitmqRPC {
 			logName = 'RabbitmqRPC',
 			exchangeName = 'RabbitmqRPC',
 			timeout = 10000,
-			replyTimeout,
 			log
 		} =
 			opts || {};
@@ -22,10 +22,6 @@ class RabbitmqRPC {
 				level: logLevel,
 				name: logName
 			});
-		if (replyTimeout) {
-			this._log.warn('Deprecated replyTimeout option please use timeout instead');
-			this._timeout = replyTimeout;
-		}
 
 		this._timeout = timeout;
 		this._url = url;
@@ -40,6 +36,7 @@ class RabbitmqRPC {
 
 		// autoReconnect exchange;
 		this._connection.on('close', () => {
+			this._log.debug('reconnect after close');
 			this._reconnect();
 		});
 		this._requestChannel = this._connection.newRequestChannel();
@@ -53,11 +50,7 @@ class RabbitmqRPC {
 	request (serviceName, method, data, options) {
 		const requestId = uuid();
 		const content = JSON.stringify(data);
-		let { timeout = this._timeout, replyTimeout } = options || {};
-		if (replyTimeout && timeout === this._timeout) {
-			this._log.warn('Deprecated replyTimeout option please use timeout instead');
-			timeout = replyTimeout;
-		}
+		let { timeout = this._timeout } = options || {};
 
 		return new Promise((resolve, reject) => {
 			this._connection
@@ -76,12 +69,7 @@ class RabbitmqRPC {
 							setImmediate(() => {
 								const erreurMsg =
 									'No reply received within the configured timeout of ' +
-									timeout +
-									' ms service : [' +
-									serviceName +
-									'] method : [' +
-									method +
-									']';
+									`${timeout} ms service : [${serviceName}] method : [${method}]`;
 								channel.responseEmitter.emit(requestId, { err: erreurMsg });
 							});
 						}, timeout);
@@ -131,6 +119,11 @@ class RabbitmqRPC {
 
 	createService (name, opts) {
 		return new Service(name, opts, this._connectionOptions, this._log);
+	}
+
+	closeConnection () {
+		this._log.info('closing rpc connection...');
+		this._connection.close();
 	}
 }
 

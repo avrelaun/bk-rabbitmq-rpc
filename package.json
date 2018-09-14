@@ -1,6 +1,6 @@
 {
 	"name": "bk-rabbitmq-rpc",
-	"version": "0.4.2",
+	"version": "0.5.0",
 	"description": "Library for rabbitmq and use rpc service",
 	"main": "src/index.js",
 	"scripts": {
@@ -29,15 +29,14 @@
 	"homepage": "https://github.com/Beekast/bk-rabbitmq-rpc#readme",
 	"devDependencies": {
 		"ava": "^0.25.0",
-		"eslint": "^4.16.0",
-		"nyc": "11.0.2"
+		"eslint": "^5.5.0",
+		"nyc": "^13.0.1"
 	},
 	"dependencies": {
 		"amqplib": "0.5.2",
-		"babel-eslint": "^8.2.1",
 		"backoff": "^2.5.0",
 		"bunyan": "1.8.12",
-		"uuid": "3.1.0"
+		"uuid": "^3.3.2"
 	},
 	"ava": {
 		"files": [
