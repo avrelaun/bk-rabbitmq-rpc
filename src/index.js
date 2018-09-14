@@ -61,7 +61,7 @@ class RabbitmqRPC {
 	}
 
 	createService (name, opts) {
-		return new Service(this.broker, name, opts, this._connectionOptions, this._log);
+		return new Service(this._broker, name, opts, this._connectionOptions, this._log);
 	}
 }
 
