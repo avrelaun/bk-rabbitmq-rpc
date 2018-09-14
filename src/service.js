@@ -6,6 +6,7 @@ class Service {
 		this.isConsumerStarted = false;
 		this._log = log;
 		this.limit = limit;
+		this._broker = broker;
 
 		if (!serviceName) {
 			throw new Error('you must provide a service name');
