@@ -1,13 +1,13 @@
 const Logger = require('./logger');
 const Service = require('./service');
 
-const uuid = require('uuid/v1');
+// const uuid = require('uuid/v1');
 const { ServiceBroker } = require('moleculer');
 
 class RabbitmqRPC {
 	constructor (opts) {
 		const {
-			url = 'nats://localhost:4222',
+			url = 'nats://nats:4222',
 			logLevel = 'info',
 			logName = 'RabbitmqRPC',
 			timeout = 10000,
