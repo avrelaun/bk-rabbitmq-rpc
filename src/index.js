@@ -7,7 +7,7 @@ const { ServiceBroker } = require('moleculer');
 class RabbitmqRPC {
 	constructor (opts) {
 		const {
-			url = 'amqp://guest:guest@localhost:5672/',
+			url = 'nats://localhost:4222',
 			logLevel = 'info',
 			logName = 'RabbitmqRPC',
 			timeout = 10000,
@@ -26,11 +26,12 @@ class RabbitmqRPC {
 		this._url = url;
 
 		this._brokerOptions = {
-			url,
-			log: this._log
+			transporter: url,
+			logLevel,
+			timeout
 		};
 
-		this._broker = new ServiceBroker(this._brokerOptions, 'requestConnection');
+		this._broker = new ServiceBroker(this._brokerOptions);
 	}
 
 	request (serviceName, method, data, options) {
