@@ -35,6 +35,12 @@ service.handle('myMethod', function(data){
 // or if you don't use option autoStartConsume for rpc server
 service.startConsume();
 
+// close service connection
+service.closeConnection();
+
+// close client connection
+client.closeConnection();
+
 ```
 On RPC Client :
 ```javascript
