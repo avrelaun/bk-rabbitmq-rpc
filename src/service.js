@@ -11,8 +11,6 @@ class Service {
 			throw new Error('you must provide a service name');
 		}
 		this.serviceName = serviceName;
-
-		this.responseChannel = this._responseConnection.newChannel();
 	}
 
 	handle (method, callback) {
