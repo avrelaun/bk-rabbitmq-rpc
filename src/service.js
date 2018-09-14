@@ -25,6 +25,7 @@ class Service {
 	}
 
 	startConsume () {
+		console.log('-------- SCHEMA', this._schema);
 		this._broker.createService(this._schema);
 	}
 }
