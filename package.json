@@ -36,6 +36,7 @@
 		"amqplib": "0.5.2",
 		"backoff": "^2.5.0",
 		"bunyan": "1.8.12",
+		"moleculer": "^0.13.2",
 		"uuid": "^3.3.2"
 	},
 	"ava": {
